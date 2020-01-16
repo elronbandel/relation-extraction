@@ -30,7 +30,7 @@ class RexDataset():
 
 
 if __name__ == "__main__":
-    ds = RexDataset(path='dataset')
+    ds = RexDataset()
     batch = next(iter(ds.train(2, 'cuda:0')))
     ((sent, len), cand1, cand2), target = batch
     print(sent)
