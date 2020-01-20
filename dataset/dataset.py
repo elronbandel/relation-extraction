@@ -7,16 +7,12 @@ class RexDataset():
     def __init__(self, path='', glove_name='6B', glove_dim=300):
         fields = [
             ('text', Field(include_lengths=True, sequential=True)),
-            ('cand1', Field( dtype=int)),
-            ('cand2', Field(dtype=int)),
-            ('label', Field(is_target=True))
+            ('label', Field(is_target=True, postprocessing=lambda X, voc: [x[0] - 2 for x in X]))
         ]
         self.train_set, self.dev_set = SequenceTaggingDataset.splits(path=path, train='train.tsv', validation='dev.tsv',fields = fields)
         self.fields = dict(fields)
         self.fields['text'].build_vocab(self.train_set, self.dev_set, vectors=vocab.GloVe(name=glove_name, dim=glove_dim))
-        self.fields['cand1'].build_vocab(self.train_set)
-        self.fields['cand2'].build_vocab(self.train_set)
-        self.fields['label'].build_vocab(self.train_set)
+        self.fields['label'].build_vocab(self.train_set, specials=[])
 
 
     def train(self, batch_size, device):

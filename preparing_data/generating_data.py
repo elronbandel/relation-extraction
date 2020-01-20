@@ -81,7 +81,8 @@ from itertools import combinations
 def annotation_record(sentence, candidate1,  candidate2, label):
     return "\n".join([token if i !=0 else '\t'.join([token, str(candidate1), str(candidate2), label]) for i, token in enumerate(sentence)])
 
-def generate_data(corpus, annots, nlp):
+# generate sentences with annotations and direction and entities
+def generate_directed_data(corpus, annots, nlp):
     data = []
     for id, sent in corpus.items():
         text, ents = [], []
@@ -99,6 +100,17 @@ def generate_data(corpus, annots, nlp):
                     rel = 'NON'
                 data.append(annotation_record(text, i1, i2, rel))
     return data
+
+def generate_data(corpus, annots, nlp):
+    data = []
+    for id, sent in corpus.items():
+        labels = set()
+        for annot in annots[id]:
+            labels.add(annot[1])
+        label = ''.join((sorted(list(labels)))) if len(labels) > 1 else 'NON'
+        data.append("\n".join(word.text if i else '\t'.join([word.text, label])for i, word in enumerate(nlp(sent))))
+    return data
+
 
 def make_tsv(section, nlp):
     corpus = load_corpus(f'data/Corpus.{section}.txt')

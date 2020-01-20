@@ -12,32 +12,29 @@ from torch.nn import Module, Embedding, Linear
 class LSTMAcceptor(Module):
     def __init__(self, input_size, hidden_size, num_layers=2, bidirectional=True, dropout=0):
         super().__init__()
-        self.lstm = LSTM(input_size, hidden_size, num_layers, bidirectional=bidirectional, dropout=0)
+        self.lstm = LSTM(input_size, hidden_size, num_layers, bidirectional=bidirectional, dropout=dropout)
 
     def forward(self, padded_seqs, lens):
-        packed = pack_padded_sequence(padded_seqs, lens, enforce_sorted=False)
-        output, (ht, ct) = self.lstm(packed)
-        output, out_lens = pad_packed_sequence(output)
-        last_seq = output[out_lens - 1, torch.arange(output.shape[1])]
+        #packed = pack_padded_sequence(padded_seqs, lens, enforce_sorted=False)
+        output, (ht, ct) = self.lstm(padded_seqs)
+        #output, out_lens = pad_packed_sequence(output)
+        last_seq = output[lens - 1, torch.arange(output.shape[1])]
         return last_seq
 
 
 class Tagger(Module):
-    def __init__(self, embedding_vecs, lstm_hidden, out_dim, padding_idx=1, projected_dim=200):
+    def __init__(self, embedding_vecs, lstm_hidden, out_dim, padding_idx=1, projected_dim=200, bidirectional=True, dropout=0):
         super().__init__()
         self.embedding = Embedding.from_pretrained(embedding_vecs, padding_idx=padding_idx, freeze=True)
-        self.projection = (embedding_vecs.shape[1], projected_dim)
-        self.cand1vec = Parameter(torch.FloatTensor(projected_dim))
-        self.cand2vec = Parameter(torch.FloatTensor(projected_dim))
-        self.lstm2out = Linear(lstm_hidden, out_dim)
-        self.lstm = LSTMAcceptor(projected_dim, lstm_hidden)
+        self.projection = Linear(embedding_vecs.shape[1], projected_dim)
+        self.lstm2out = Linear(lstm_hidden * 2 if bidirectional else lstm_hidden, out_dim)
+        self.lstm = LSTMAcceptor(projected_dim, lstm_hidden, bidirectional=bidirectional, dropout=dropout)
 
     def forward(self, data):
-        (sentences, lengths), cand1, cand2 = data
-        embedded = self.embedder(sentences)
-        embedded[cand1] += self.cand1vec
-        embedded[cand2] += self.cand2vec
-        output = self.lstm(embedded, lengths)
+        sentences, lengths = data
+        embedded = self.embedding(sentences)
+        projected = self.projection(embedded)
+        output = self.lstm(projected, lengths)
         return self.lstm2out(output)
 
 

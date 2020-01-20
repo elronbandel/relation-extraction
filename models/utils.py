@@ -59,7 +59,7 @@ def train(model, loss_func, epochs, optimizer, train_set, dev_set):
         # Train
         model.train()
         avg_loss = None
-        train_accuracy = AccuracyCounter()
+        train_accuracy = AccuracyCounter(ignore_label=0)
         for i, (data, target) in enumerate(train_set):
             optimizer.zero_grad()
             model.zero_grad()
@@ -73,7 +73,7 @@ def train(model, loss_func, epochs, optimizer, train_set, dev_set):
         # Eval
         model.eval()
         with torch.no_grad():
-            eval_accuracy = AccuracyCounter()
+            eval_accuracy = AccuracyCounter(ignore_label=0)
             for data, target in dev_set:
                 out = model(data)
                 eval_accuracy.compute_from_soft(out, target)
