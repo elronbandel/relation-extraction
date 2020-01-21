@@ -25,29 +25,35 @@ def find_dep_path(leaf1,leaf2):
     return [],[]
 
 
-#typed_dep_map = extract_dep_map(en1.root, en2.root, token)
-#word_dep , type_dep , tag_dep = zip(*typed_dep_map)
+def print_path(en1, en2):
+    up_p, down_p = find_dep_path(en1.root, en2.root)
+    print("up_p:", up_p)
+    print("down_p", down_p)
 
-def extract_features(en1, en2, token):
+
+def extract_features(en1, en2, tokens):
     start = en1.end
     end = en2.start
-    prev_word = token[en1.start - 1].lemma_ if en1.start > 0 else 'None'
-    next_word = token[en2.end].lemma_ if en2.end < len(token) else 'None'
-    prev_tag = token[en1.start - 1].tag_ if en1.start > 0 else 'None'
+    prev_word = tokens[en1.start - 1].lemma_ if en1.start > 0 else 'None'
+    next_word = tokens[en2.end].lemma_ if en2.end < len(tokens) else 'None'
+    prev_tag = tokens[en1.start - 1].tag_ if en1.start > 0 else 'None'
 
+    words_list = [t.lemma_ for t in tokens[start:end]]
     # TODO extract feature from dependancy tree
-    words_list = [t.lemma_ for t in token[start:end]]
+
+
     features = {
-        'en1_type': en1.label,
+        'en1_type': en1.label_,
         'en1_head': en1.root.lemma_,
-        'en2_type': en2.label,
+        'en2_type': en2.label_,
         'en2_head': en2.root.lemma_,
         'word-before': prev_word,
         'tag-before': prev_tag,
         'concatenatedtypes': en1.label_ + en2.label_,
-        'base-syntactic-path': [w.tag_ for w in token[en1.start:en2.end]],
+        'base-syntactic-path': [w.tag_ for w in tokens[en1.start:en2.end]],
         'word-after-entity2': next_word,
         'between-entities-word_set': set(words_list),
         'between-entities-word_concat': "-".join(words_list),
     }
+
     return features
