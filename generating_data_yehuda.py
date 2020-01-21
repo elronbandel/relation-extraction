@@ -157,7 +157,7 @@ def make_tsv(section, nlp):
     corpus = load_corpus(f'data/Corpus.{section}.txt')
     annotations = load_annotations(f'data/{section}.annotations')
     processed = process_annotations(annotations, nlp)
-    data = generate_directed_data_with_extract_feature(corpus, processed, nlp)
+    data = generate_data_extract_feature(corpus, processed, nlp)
     open(f'{section.lower()}.tsv', 'w+').write("\n\n".join(data))
 
 
