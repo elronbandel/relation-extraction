@@ -4,6 +4,13 @@
 #
 # def is_place_to_live(ent):
 
+def find_dep_path_directional(right_token, left_token, tokens):
+    right_path, left_path= [], []
+
+
+    return right_path, left_path, head
+
+
 def find_dep_path(leaf1,leaf2):
     parent1 = leaf1
     parent2 = leaf2
@@ -32,28 +39,38 @@ def print_path(en1, en2):
 
 
 def extract_features(en1, en2, tokens):
-    start = en1.end
-    end = en2.start
-    prev_word = tokens[en1.start - 1].lemma_ if en1.start > 0 else 'None'
-    next_word = tokens[en2.end].lemma_ if en2.end < len(tokens) else 'None'
-    prev_tag = tokens[en1.start - 1].tag_ if en1.start > 0 else 'None'
+    # start = en1.end
+    # end = en2.start
+    # prev_word = tokens[en1.start - 1].lemma_ if en1.start > 0 else 'None'
+    # next_word = tokens[en2.end].lemma_ if en2.end < len(tokens) else 'None'
+    # prev_tag = tokens[en1.start - 1].tag_ if en1.start > 0 else 'None'
 
-    words_list = [t.lemma_ for t in tokens[start:end]]
+    # words_list = [t.lemma_ for t in tokens[start:end]]
     # TODO extract feature from dependancy tree
 
 
     features = {
-        'en1_type': en1.label_,
-        'en1_head': en1.root.lemma_,
-        'en2_type': en2.label_,
-        'en2_head': en2.root.lemma_,
-        'word-before': prev_word,
-        'tag-before': prev_tag,
-        'concatenatedtypes': en1.label_ + en2.label_,
-        'base-syntactic-path': [w.tag_ for w in tokens[en1.start:en2.end]],
-        'word-after-entity2': next_word,
-        'between-entities-word_set': set(words_list),
-        'between-entities-word_concat': "-".join(words_list),
+        'en1_type': en1.ent_type_,
+
+        # 'en1_head': en1.root.lemma_,
+        'en2_type': en2.ent_type_,
+        # 'en2_head': en2.root.lemma_,
+        'concatenatedtypes': en1.ent_type_ + en2.ent_type_,
+
+
+        # 'word-after-entity2': next_word,
+        # 'between-entities-word_set': set(words_list),
+        # 'between-entities-word_concat': "-".join(words_list),
     }
 
     return features
+def extract_dependency_features():
+
+     dependency_features = {
+
+
+
+     }
+
+
+

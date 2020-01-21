@@ -114,9 +114,10 @@ def generate_data_extract_feature(corpus, annots, nlp):
             text.append(token.text)
             if not token.ent_type_ == '':
                 ents.append((token, i))
+                token.ent_type_
         for (arg1, i1), (arg2, i2) in combinations(ents, 2):
             for annot in annots[id]:
-                feature_dict = ey.extract_feature(arg1,arg2, sent_split)
+                feature_dict = ey.extract_features(arg1,arg2, sent_split)
                 # head_ent1, head_ent2, ent_ner_tag1, ent_ner_tag2
                 print(feature_dict)
                 # if annot[1] != "Live_In" or annot[1] != "Work_For":
