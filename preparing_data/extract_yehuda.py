@@ -7,32 +7,6 @@ from collections import Counter
 from operator import attrgetter
 
 
-def find_dep_path(leaf1,leaf2):
-    parent1 = leaf1
-    parent2 = leaf2
-    path1=[]
-    path2=[]
-    while True:
-        path1.append(parent1.i)
-        if parent1 == parent1.head:
-            break
-        parent1 = parent1.head
-    p2id = {k:v for v,k in enumerate(path1)}
-    while True:
-        if parent2.i in p2id:
-           return path1,list(reversed(path2))
-        path2.append(parent2.i)
-        if parent2 == parent2.head:
-            break
-        parent2 = parent2.head
-    return [],[]
-
-
-def print_path(en1, en2):
-    up_p, down_p = find_dep_path(en1.root, en2.root)
-    print("up_p:", up_p)
-    print("down_p", down_p)
-
 
 def extract_features(en1, en2, tokens):
     features = dict()
@@ -79,10 +53,4 @@ def extract_features_from_dependency(dep):
     features.update({f'dep-left-{key.lower()}-deps': val for key, val in count_dep_deps_left.items()})
 
     return features
-
-
-
-
-
-
 
