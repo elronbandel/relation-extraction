@@ -1,7 +1,7 @@
 import spacy
 from collections import defaultdict
-from preparing_data import extract_yehuda as ey
-
+import extract_yehuda as ey
+import csv
 
 # loading the corpus itself:
 def load_corpus(path):
@@ -118,8 +118,10 @@ def generate_data_extract_feature(corpus, annots, nlp):
         for (arg1, i1), (arg2, i2) in combinations(ents, 2):
             for annot in annots[id]:
                 feature_dict = ey.extract_features(arg1,arg2, sent_split)
-                # head_ent1, head_ent2, ent_ner_tag1, ent_ner_tag2
-                print(feature_dict)
+                # print(feature_dict)
+                data.append(feature_dict)
+
+
                 # if annot[1] != "Live_In" or annot[1] != "Work_For":
                 #     relation = 'NON'
 
@@ -131,15 +133,6 @@ def generate_data_extract_feature(corpus, annots, nlp):
                 #     rel = 'NON'
                 # data.append(annotation_record(text, i1, i2, relation))
     return data
-
-
-def extract_feature(annot, arg1, i1, arg2, i2):
-
-    if annot[1] != "Live_In" or annot[1] != "Work_For":
-        relation = 'NON'
-
-
-
 
 
 
@@ -154,12 +147,57 @@ def generate_data(corpus, annots, nlp):
     return data
 
 
-def make_tsv(section, nlp):
+def make_csv(section, nlp):
     corpus = load_corpus(f'data/Corpus.{section}.txt')
     annotations = load_annotations(f'data/{section}.annotations')
     processed = process_annotations(annotations, nlp)
     data = generate_data_extract_feature(corpus, processed, nlp)
-    open(f'{section.lower()}.tsv', 'w+').write("\n\n".join(data))
+    write_dictionary_to_csv_file(data, section)
+    # open(f'{section.lower()}.tsv', 'w+').write("\n\n".join(data))
+
+
+def write_dictionary_to_csv_file(dict_data, section):
+    csv_columns = set()
+    for data in dict_data:
+        for key in data:
+            csv_columns.add(key)
+    csv_columns = list(csv_columns)
+    # print(csv_columns)
+
+    csv_file_name = section.lower() + '.csv'
+    with open(csv_file_name, 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+        writer.writeheader()
+        for data in dict_data:
+            writer.writerow(data)
+
+
+def read_csv_to_list_of_dictionaries(file_name):
+
+    with open(file_name, mode='r') as csv_file:
+        csv_reader = [{k: v for k, v in row.items()} for row in csv.DictReader(csv_file)]
+        # print(csv_reader)
+        # line_count = 0
+        # for row in csv_reader:
+        #     if line_count == 0:
+        #         print(f'Column names are {", ".join(row)}')
+        #     else:
+        #         print(row)
+        #     line_count += 1
+
+    return csv_reader
+
+
+def convert_feature_to_dict_vectories(list_dicts):
+    from sklearn.feature_extraction import DictVectorizer
+    vec = DictVectorizer()
+    vec.fit_transform(list_dicts)
+    # print(vec.get_feature_names())
+    # print(vec)
+
+
+    return vec
+
 
 
 def check_intersection(corpus, annots):
@@ -179,8 +217,14 @@ def check_intersection(corpus, annots):
 if __name__ == "__main__":
     nlp = spacy.load('en_core_web_sm')
     nlp.add_pipe(nlp.create_pipe('merge_entities'))
-    make_tsv('TRAIN', nlp)
-    make_tsv('DEV', nlp)
+    make_csv('TRAIN', nlp)
+    make_csv('DEV', nlp)
+
+    # for elron
+    tarin_list_dicts = read_csv_to_list_of_dictionaries('train.csv')
+    print(type(tarin_list_dicts))
+    dev_list_dicts = read_csv_to_list_of_dictionaries('dev.csv')
+    convert_feature_to_dict_vectories(tarin_list_dicts)
 
 
 

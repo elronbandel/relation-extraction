@@ -59,6 +59,7 @@ def find_dependecny(right_token, left_token):
     left_path = left_path[:left_path.index(head)]
     return right_path, left_path, head
 
+
 def extract_features_from_dependency(dep):
     right_path, left_path, head = dep
     features = {
@@ -76,6 +77,7 @@ def extract_features_from_dependency(dep):
     count_dep_deps_left = Counter(map(attrgetter('dep_'), left_path))
     features.update({f'dep-right-{key.lower()}-deps': val for key, val in count_dep_deps_right.items()})
     features.update({f'dep-left-{key.lower()}-deps': val for key, val in count_dep_deps_left.items()})
+
     return features
 
 
