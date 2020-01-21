@@ -105,7 +105,7 @@ def generate_directed_data(corpus, annots, nlp):
 good_annot = ["Live_In", "Work_For" ]
 
 # generate sentences with annotations and direction and entities
-def generate_directed_data_with_extract_feature(corpus, annots, nlp):
+def generate_data_extract_feature(corpus, annots, nlp):
     data = []
     for id, sent in corpus.items():
         text, ents = [], []
@@ -116,7 +116,7 @@ def generate_directed_data_with_extract_feature(corpus, annots, nlp):
                 ents.append((token, i))
         for (arg1, i1), (arg2, i2) in combinations(ents, 2):
             for annot in annots[id]:
-                feature_dict = extract_feature(arg1,arg2, sent_split)
+                feature_dict = ey.extract_feature(arg1,arg2, sent_split)
                 # head_ent1, head_ent2, ent_ner_tag1, ent_ner_tag2
                 print(feature_dict)
                 # if annot[1] != "Live_In" or annot[1] != "Work_For":
