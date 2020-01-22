@@ -5,7 +5,7 @@ from torch import nn, Tensor
 import torch
 
 from models.utils import train
-from dataset.dataset import RexDataset
+from dataset.dataset_old import RexDataset
 from torch.nn import Module, Embedding, Linear
 
 

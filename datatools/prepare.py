@@ -140,29 +140,13 @@ def write_dictionary_to_csv_file(dict_data, section):
             writer.writerow(data)
 
 
-def read_csv_to_list_of_dictionaries(file_name):
-    with open(file_name, mode='r') as csv_file:
-        csv_reader = [{k: v for k, v in row.items()} for row in csv.DictReader(csv_file)]
-    return csv_reader
 
-
-def convert_feature_to_dict_vectories(list_dicts):
-    from sklearn.feature_extraction import DictVectorizer
-    vec = DictVectorizer()
-    vec.fit_transform(list_dicts)
-    return vec
 
 if __name__ == "__main__":
     nlp = spacy.load('en_core_web_sm')
     nlp.add_pipe(nlp.create_pipe('merge_entities'))
     make_csv('TRAIN', nlp)
     make_csv('DEV', nlp)
-
-    # for elron
-    tarin_list_dicts = read_csv_to_list_of_dictionaries('train.csv')
-    print(type(tarin_list_dicts))
-    dev_list_dicts = read_csv_to_list_of_dictionaries('dev.csv')
-    convert_feature_to_dict_vectories(tarin_list_dicts)
 
 
 

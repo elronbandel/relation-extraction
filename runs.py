@@ -5,7 +5,7 @@ from torch import nn, Tensor
 import torch
 
 from models.utils import train
-from dataset.dataset import RexDataset
+from dataset.dataset_old import RexDataset
 from models.bilstm import Tagger
 
 if __name__ == "__main__":
