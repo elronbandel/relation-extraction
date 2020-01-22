@@ -15,6 +15,11 @@ def extract_features(en1, en2, tokens):
         features = extract_features_from_dependency(dependency)
     features.update({
         'label': 'NON',
+        'id': 'NON',
+        'ent1': 'NON',
+        'ent2': 'NON',
+        'sent': 'NON',
+
         'ent1-type': en1.ent_type_,
         'ent2-type': en2.ent_type_,
         'concatenated-types': en1.ent_type_ + en2.ent_type_,
@@ -45,6 +50,7 @@ def extract_features_from_dependency(dep):
     }
     count_dep_pos_right = Counter(map(attrgetter('tag_'), right_path))
     count_dep_pos_left = Counter(map(attrgetter('tag_'), left_path))
+    #TODO pay attention "count_dep_pos" not in use
     count_dep_pos = count_dep_pos_left + count_dep_pos_right
     features.update({f'dep-right-{key.lower()}-tags': val for key, val in count_dep_pos_right.items()})
     features.update({f'dep-left-{key.lower()}-tags': val for key, val in count_dep_pos_left.items()})

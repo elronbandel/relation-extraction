@@ -87,6 +87,16 @@ def annotation_record(sentence, candidate1,  candidate2, label):
 
 good_annot = ["Live_In", "Work_For" ]
 
+
+def add_sent_data_to_dict_features(id, sent, ent1, ent2, feature_dict):
+    feature_dict['id'] = id
+    feature_dict['ent1'] = ent1
+    feature_dict['ent2'] = ent2
+    feature_dict['sent'] = sent
+    # print(feature_dict)
+    return feature_dict
+
+
 # generate sentences with annotations and direction and entities
 def generate_data_extract_feature(corpus, annots, nlp):
     data = []
@@ -97,6 +107,9 @@ def generate_data_extract_feature(corpus, annots, nlp):
         for ent1, ent2 in combinations(ents, 2):
             feature_dict_12 = ey.extract_features(ent1, ent2, sent_split)
             feature_dict_21 = ey.extract_features(ent2, ent1, sent_split)
+            feature_dict_12 = add_sent_data_to_dict_features(id, sent, ent1, ent2, feature_dict_12)
+            feature_dict_21 = add_sent_data_to_dict_features(id, sent, ent2, ent1, feature_dict_21)
+            # print(feature_dict_12)
             for annot in annots[id]:
                 if annot[0] == ent1.text and annot[2] == ent2.text:
                     feature_dict_12['label'] = annot[1]
@@ -142,6 +155,8 @@ def write_dictionary_to_csv_file(dict_data, section):
         writer.writeheader()
         for data in dict_data:
             writer.writerow(data)
+
+
 
 
 
