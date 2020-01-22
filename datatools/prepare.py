@@ -2,7 +2,7 @@ from operator import itemgetter
 
 import spacy
 from collections import defaultdict, Counter
-import extract_yehuda as ey
+import extract as ey
 import csv
 
 # loading the corpus itself:
@@ -53,6 +53,7 @@ def normalize_entitiy(raw_ent, sent, nlp):
     for ent in ents:
         ent = str(ent)
         if ent in raw_ent or raw_ent in ent:
+            print(raw_ent + '->' + ent)
             return ent
     return raw_ent
 
@@ -89,6 +90,7 @@ good_annot = ["Live_In", "Work_For" ]
 # generate sentences with annotations and direction and entities
 def generate_data_extract_feature(corpus, annots, nlp):
     data = []
+    possible_types = set()
     for id, sent in corpus.items():
         sent_split = nlp(sent)
         ents = list(filter(lambda tok: tok.ent_type_ != '', sent_split))
@@ -98,17 +100,19 @@ def generate_data_extract_feature(corpus, annots, nlp):
             for annot in annots[id]:
                 if annot[0] == ent1.text and annot[2] == ent2.text:
                     feature_dict_12['label'] = annot[1]
+                    possible_types.add(feature_dict_12['concatenated-types'])
                     break
                 if annot[0] == ent2.text and annot[2] == ent1.text:
                     feature_dict_21['label'] = annot[1]
+                    possible_types.add(feature_dict_21['concatenated-types'])
                     break
-            if feature_dict_12['concatenated-types'] in possible_combinations:
-                data.append(feature_dict_12)
-            if feature_dict_21['concatenated-types'] in possible_combinations:
-                data.append(feature_dict_21)
-    return data
+            data.append(feature_dict_12)
+            data.append(feature_dict_21)
+    print('possible-ent-combinations:' + str(possible_types))
+    return list(filter(lambda x: x['concatenated-types'] in possible_types or x['concatenated-types'] in possible_train or x['concatenated-types'] in possible_dev, data))
 
-possible_combinations = {'FACGPE', 'PERSONORDINAL', 'PERSONFAC', 'GPEFAC', 'ORGNORP', 'ORGFAC', 'ORGLOC', 'PERSONNORP','PERSONLOC', 'GPEORG', 'PERSONWORK_OF_ART', 'PERSONPERSON', 'PERSONORG', 'PERSONGPE', 'ORGORG', 'ORGGPE', 'GPEGPE'}
+possible_train = {'GPEGPE', 'PERSONORG', 'PERSONGPE', 'PERSONFAC', 'ORGFAC', 'ORGORG', 'PERSONNORP', 'DATEORG', 'GPENORP', 'ORGGPE', 'ORGNORP', 'PERSONPERSON'}
+possible_dev = {'PERSONFAC', 'PERSONORG', 'PERSONGPE', 'ORGFAC', 'ORGORG', 'PERSONNORP', 'PERSONLOC', 'WORK_OF_ARTORG', 'ORGGPE', 'ORGLOC', 'PERSONPERSON'}
 
 def data_stats(data):
     print(Counter(map(itemgetter('label'), data)))
@@ -143,7 +147,7 @@ def write_dictionary_to_csv_file(dict_data, section):
 
 
 if __name__ == "__main__":
-    nlp = spacy.load('en_core_web_sm')
+    nlp = spacy.load('en_core_web_lg')
     nlp.add_pipe(nlp.create_pipe('merge_entities'))
     make_csv('TRAIN', nlp)
     make_csv('DEV', nlp)
