@@ -1,5 +1,7 @@
+from operator import itemgetter
+
 import spacy
-from collections import defaultdict
+from collections import defaultdict, Counter
 import extract_yehuda as ey
 import csv
 
@@ -82,69 +84,34 @@ from itertools import combinations
 def annotation_record(sentence, candidate1,  candidate2, label):
     return "\n".join([token if i !=0 else '\t'.join([token, str(candidate1), str(candidate2), label]) for i, token in enumerate(sentence)])
 
-# generate sentences with annotations and direction and entities
-def generate_directed_data(corpus, annots, nlp):
-    data = []
-    for id, sent in corpus.items():
-        text, ents = [], []
-        for i, token in enumerate(nlp(sent)):
-            text.append(token.text)
-            if not token.ent_type_ == '':
-                ents.append((token.text, i))
-        for (arg1, i1), (arg2, i2) in combinations(ents, 2):
-            for annot in annots[id]:
-                if arg1 == annot[0] and arg2 == annot[2]:
-                    rel = f'{annot[1]}->'
-                elif arg2 == annot[0] and arg1 == annot[2]:
-                    rel = f'{annot[1]}<-'
-                else:
-                    rel = 'NON'
-                data.append(annotation_record(text, i1, i2, rel))
-    return data
-
 good_annot = ["Live_In", "Work_For" ]
 
 # generate sentences with annotations and direction and entities
 def generate_data_extract_feature(corpus, annots, nlp):
     data = []
     for id, sent in corpus.items():
-        text, ents = [], []
         sent_split = nlp(sent)
-        for i, token in enumerate(sent_split):
-            text.append(token.text)
-            if not token.ent_type_ == '':
-                ents.append((token, i))
-                #token.ent_type_
-        for (arg1, i1), (arg2, i2) in combinations(ents, 2):
+        ents = list(filter(lambda tok: tok.ent_type_ != '', sent_split))
+        for ent1, ent2 in combinations(ents, 2):
+            feature_dict_12 = ey.extract_features(ent1, ent2, sent_split)
+            feature_dict_21 = ey.extract_features(ent2, ent1, sent_split)
             for annot in annots[id]:
-                feature_dict = ey.extract_features(arg1,arg2, sent_split)
-                # print(feature_dict)
-                data.append(feature_dict)
-
-
-                # if annot[1] != "Live_In" or annot[1] != "Work_For":
-                #     relation = 'NON'
-
-                # if arg1 == annot[0] and arg2 == annot[2]:
-                #     rel = f'{annot[1]}->'
-                # elif arg2 == annot[0] and arg1 == annot[2]:
-                #     rel = f'{annot[1]}<-'
-                # else:
-                #     rel = 'NON'
-                # data.append(annotation_record(text, i1, i2, relation))
+                if annot[0] == ent1.text and annot[2] == ent2.text:
+                    feature_dict_12['label'] = annot[1]
+                    break
+                if annot[0] == ent2.text and annot[2] == ent1.text:
+                    feature_dict_21['label'] = annot[1]
+                    break
+            if feature_dict_12['concatenated-types'] in possible_combinations:
+                data.append(feature_dict_12)
+            if feature_dict_21['concatenated-types'] in possible_combinations:
+                data.append(feature_dict_21)
     return data
 
+possible_combinations = {'FACGPE', 'PERSONORDINAL', 'PERSONFAC', 'GPEFAC', 'ORGNORP', 'ORGFAC', 'ORGLOC', 'PERSONNORP','PERSONLOC', 'GPEORG', 'PERSONWORK_OF_ART', 'PERSONPERSON', 'PERSONORG', 'PERSONGPE', 'ORGORG', 'ORGGPE', 'GPEGPE'}
 
-
-def generate_data(corpus, annots, nlp):
-    data = []
-    for id, sent in corpus.items():
-        labels = set()
-        for annot in annots[id]:
-            labels.add(annot[1])
-        label = ''.join((sorted(list(labels)))) if len(labels) > 1 else 'NON'
-        data.append("\n".join(word.text if i else '\t'.join([word.text, label])for i, word in enumerate(nlp(sent))))
-    return data
+def data_stats(data):
+    print(Counter(map(itemgetter('label'), data)))
 
 
 def make_csv(section, nlp):
@@ -152,6 +119,7 @@ def make_csv(section, nlp):
     annotations = load_annotations(f'data/{section}.annotations')
     processed = process_annotations(annotations, nlp)
     data = generate_data_extract_feature(corpus, processed, nlp)
+    data_stats(data)
     write_dictionary_to_csv_file(data, section)
     # open(f'{section.lower()}.tsv', 'w+').write("\n\n".join(data))
 
@@ -173,18 +141,8 @@ def write_dictionary_to_csv_file(dict_data, section):
 
 
 def read_csv_to_list_of_dictionaries(file_name):
-
     with open(file_name, mode='r') as csv_file:
         csv_reader = [{k: v for k, v in row.items()} for row in csv.DictReader(csv_file)]
-        # print(csv_reader)
-        # line_count = 0
-        # for row in csv_reader:
-        #     if line_count == 0:
-        #         print(f'Column names are {", ".join(row)}')
-        #     else:
-        #         print(row)
-        #     line_count += 1
-
     return csv_reader
 
 
@@ -192,27 +150,7 @@ def convert_feature_to_dict_vectories(list_dicts):
     from sklearn.feature_extraction import DictVectorizer
     vec = DictVectorizer()
     vec.fit_transform(list_dicts)
-    # print(vec.get_feature_names())
-    # print(vec)
-
-
     return vec
-
-
-
-def check_intersection(corpus, annots):
-    corp_ents = corpus_entetities(corpus, nlp)
-    anot_ents = anotations_entitites(annots)
-    print(corp_ents)
-    print(anot_ents)
-    inter = anot_ents.intersection(corp_ents)
-    print(len(inter) / len(anot_ents))
-    failed = anot_ents.difference(corp_ents)
-    print(sorted(list(failed)))
-    print(len(failed))
-
-
-
 
 if __name__ == "__main__":
     nlp = spacy.load('en_core_web_sm')

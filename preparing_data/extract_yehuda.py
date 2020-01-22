@@ -14,6 +14,7 @@ def extract_features(en1, en2, tokens):
     if dependency:
         features = extract_features_from_dependency(dependency)
     features.update({
+        'label': 'NON',
         'ent1-type': en1.ent_type_,
         'ent2-type': en2.ent_type_,
         'concatenated-types': en1.ent_type_ + en2.ent_type_,
