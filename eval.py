@@ -32,11 +32,11 @@ def eval_func():
     true_positive = 0
     true_positive_flag = false_negative_flag = False
     false_negative = false_positive = 0
-    perfect = 0
+    total = 0
     for sent_id in gold:
         for annot in gold[sent_id]:
             if is_live_in_or_work_relation(annot[1]):
-                perfect += 1
+                total += 1
                 for found in pred[sent_id]:
                     if is_matched_relation(annot, found, True):
                         true_positive += 1
@@ -61,7 +61,7 @@ def eval_func():
     percision = true_positive / float(true_positive + false_positive)
     recall = true_positive / float(true_positive + false_negative)
 
-    print('number of perfect recognition - work_for and live_in:', perfect)
+    print('number of total recognition - work_for and live_in:', total)
     print('flase negative: ', false_negative)
     print('false positive:', false_positive)
     print('true positive: ', true_positive)
