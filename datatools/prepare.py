@@ -141,20 +141,12 @@ def make_csv(section, nlp):
     # open(f'{section.lower()}.tsv', 'w+').write("\n\n".join(data))
 
 
-def write_dictionary_to_csv_file(dict_data, section):
-    csv_columns = set()
-    for data in dict_data:
-        for key in data:
-            csv_columns.add(key)
-    csv_columns = list(csv_columns)
-    # print(csv_columns)
-
-    csv_file_name = section.lower() + '.csv'
-    with open(csv_file_name, 'w') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+def write_dictionary_to_csv_file(dicts, section):
+    fields = list(sum((Counter(dic.keys()) for dic in dicts), Counter()).keys())
+    with open(section.lower() + '.csv', 'w+') as file:
+        writer = csv.DictWriter(open(section.lower() + '.csv', 'w+'), fieldnames=fields)
         writer.writeheader()
-        for data in dict_data:
-            writer.writerow(data)
+        writer.writerows(dicts)
 
 
 

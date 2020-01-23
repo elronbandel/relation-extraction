@@ -20,7 +20,7 @@ def print_annot_file(annot_sent_dic, label):
 if __name__ == "__main__":
     ds = DataSet('dataset')
     # Create a random forest Classifier. By convention, clf means 'Classifier'
-    clf = RandomForestClassifier(random_state=3, class_weight={0:4, 1:1, 2:4}, max_depth=12, )
+    clf = RandomForestClassifier(n_estimators=14, random_state=3, class_weight={0:4, 1:1, 2:5}, max_depth=12)
     #clf = LogisticRegression(random_state=0, class_weight={0:4, 1:1, 2:4})
 
 

@@ -22,7 +22,6 @@ def data_annot_split(dicts):
         annot_sent['sent'] = dic['sent']
 
         data.append(dic_data), label.append(dic['label']), data_for_annot_file.append(annot_sent)
-    print(label)
     return data, label, data_for_annot_file
 
 def data_label_split(dicts):
