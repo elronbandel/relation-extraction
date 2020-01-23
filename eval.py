@@ -20,9 +20,9 @@ def is_live_in_or_work_relation(relation):
     return relation == 'Live_In' or relation == 'Work_For'
 
 
-# def print_good_relation_to_file(correct_relations_sents):
-#     with open("good_relation.txt", 'w') as f:
-#         for annot in correct_relations_sents:
+def print_good_relation_to_file():
+    with open("good_pred_compare.txt", 'w') as f:
+        f.write('\n'.join(matched_list))
 
 
 def eval_func():
@@ -70,8 +70,9 @@ def eval_func():
 
     f1 = 2 * ((recall * percision) / (recall + percision))
     print('F1 score: {}'.format(f1))
-    with open("good_pred_compare.txt", 'w') as f:
-        f.write('\n'.join(matched_list))
+
+    print_good_relation_to_file()
+
 
 if __name__ == "__main__":
     eval_func()
